@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title or "SAMURAI AI" }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+            color: #e0e0e0;
+        }
+
+        .container {
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Sidebar - Ninja Themed */
+        .sidebar {
+            width: 260px;
+            background: linear-gradient(180deg, #0d0d0d 0%, #1a1a1a 100%);
+            border-right: 2px solid #00ff41;
+            color: white;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 5px 0 20px rgba(0, 255, 65, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Ninja pattern background */
+        .sidebar::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                repeating-linear-gradient(
+                    45deg,
+                    transparent,
+                    transparent 35px,
+                    rgba(0, 255, 65, 0.02) 35px,
+                    rgba(0, 255, 65, 0.02) 70px
+                );
+            pointer-events: none;
+        }
+
+        /* Logo section */
+        .sidebar-header {
+            padding: 30px 20px;
+            text-align: center;
+            border-bottom: 1px solid rgba(0, 255, 65, 0.2);
+            position: relative;
+            z-index: 1;
+        }
+
+        .sidebar h2 {
+            font-size: 28px;
+            font-weight: 900;
+            background: linear-gradient(135deg, #00ff41 0%, #00cc33 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin: 0;
+            letter-spacing: 2px;
+            text-shadow: 0 0 20px rgba(0, 255, 65, 0.5);
+        }
+
+        .sidebar-tagline {
+            color: #00ff41;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-top: 5px;
+            opacity: 0.7;
+        }
+
+        /* Navigation */
+        .sidebar ul {
+            list-style: none;
+            padding: 20px 0;
+            margin: 0;
+            flex: 1;
+            position: relative;
+            z-index: 1;
+        }
+
+        .sidebar li {
+            margin: 0;
+        }
+
+        .sidebar a {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px 25px;
+            color: #b0b0b0;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            position: relative;
+            font-weight: 500;
+            font-size: 15px;
+        }
+
+        .sidebar a::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 4px;
+            height: 0;
+            background: linear-gradient(180deg, #00ff41, #00cc33);
+            transition: height 0.3s ease;
+        }
+
+        .sidebar a:hover {
+            color: #00ff41;
+            background: rgba(0, 255, 65, 0.05);
+            padding-left: 30px;
+        }
+
+        .sidebar a:hover::before {
+            height: 60%;
+        }
+
+        .sidebar a.active {
+            color: #00ff41;
+            background: rgba(0, 255, 65, 0.1);
+            border-left: 4px solid #00ff41;
+            font-weight: 600;
+        }
+
+        .sidebar a.active::before {
+            height: 100%;
+        }
+
+        /* Icon styling */
+        .sidebar a span:first-child {
+            font-size: 20px;
+            width: 24px;
+            text-align: center;
+        }
+
+        /* Logout button special styling */
+        .sidebar a[href*="logout"] {
+            margin-top: auto;
+            border-top: 1px solid rgba(0, 255, 65, 0.2);
+            color: #ff4444;
+        }
+
+        .sidebar a[href*="logout"]:hover {
+            color: #ff6666;
+            background: rgba(255, 68, 68, 0.05);
+        }
+
+        /* Main content area */
+        .main {
+            flex: 1;
+            padding: 40px;
+            overflow-y: auto;
+            background: linear-gradient(135deg, #0f0f0f 0%, #1a1a1a 50%, #0f0f0f 100%);
+            position: relative;
+        }
+
+        /* Subtle grid pattern */
+        .main::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+                linear-gradient(rgba(0, 255, 65, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 255, 65, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            pointer-events: none;
+            opacity: 0.5;
+        }
+
+        /* Content wrapper */
+        .content-wrapper {
+            position: relative;
+            z-index: 1;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* Scrollbar styling */
+        .main::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        .main::-webkit-scrollbar-track {
+            background: #1a1a1a;
+        }
+
+        .main::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, #00ff41, #00cc33);
+            border-radius: 5px;
+        }
+
+        .main::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(180deg, #00cc33, #00ff41);
+        }
+
+        /* Page headers */
+        .main h2 {
+            color: #00ff41;
+            font-size: 32px;
+            margin-bottom: 10px;
+            font-weight: 700;
+            text-shadow: 0 0 20px rgba(0, 255, 65, 0.3);
+        }
+
+        .main h3 {
+            color: #00ff41;
+            font-size: 24px;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        .main p {
+            color: #b0b0b0;
+            line-height: 1.6;
+        }
+
+        /* Cards */
+        .card {
+            background: rgba(20, 20, 20, 0.8);
+            border: 1px solid rgba(0, 255, 65, 0.2);
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            border-color: rgba(0, 255, 65, 0.4);
+            box-shadow: 0 8px 25px rgba(0, 255, 65, 0.1);
+            transform: translateY(-2px);
+        }
+
+        /* Buttons */
+        .btn, .save-btn, button[class*="btn"] {
+            background: linear-gradient(135deg, #00ff41 0%, #00cc33 100%);
+            color: #000;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 14px;
+            box-shadow: 0 4px 15px rgba(0, 255, 65, 0.3);
+        }
+
+        .btn:hover, .save-btn:hover, button[class*="btn"]:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 255, 65, 0.4);
+        }
+
+        .btn:active, .save-btn:active, button[class*="btn"]:active {
+            transform: translateY(0);
+        }
+
+        /* Input fields */
+        input[type="text"],
+        input[type="date"],
+        input[type="email"],
+        textarea,
+        select {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(0, 255, 65, 0.3);
+            color: #e0e0e0;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        input:focus,
+        textarea:focus,
+        select:focus {
+            outline: none;
+            border-color: #00ff41;
+            box-shadow: 0 0 15px rgba(0, 255, 65, 0.2);
+            background: rgba(0, 0, 0, 0.5);
+        }
+
+        /* Responsive design */
+        @media (max-width: 968px) {
+            .sidebar {
+                width: 220px;
+            }
+
+            .main {
+                padding: 25px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                height: auto;
+                border-right: none;
+                border-bottom: 2px solid #00ff41;
+            }
+
+            .sidebar-header {
+                padding: 20px;
+            }
+
+            .sidebar h2 {
+                font-size: 24px;
+            }
+
+            .sidebar ul {
+                display: flex;
+                overflow-x: auto;
+                padding: 10px;
+            }
+
+            .sidebar li {
+                flex-shrink: 0;
+            }
+
+            .sidebar a {
+                padding: 12px 20px;
+                white-space: nowrap;
+            }
+
+            .main {
+                height: auto;
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <!-- Sidebar -->
+    <nav class="sidebar">
+        <div class="sidebar-header">
+            <h2>🥷 SAMURAI AI</h2>
+            <p class="sidebar-tagline">Study Mastery</p>
+        </div>
+        <ul>
+            <li>
+                <a href="{{ url_for('dashboard') }}" class="{% if active == 'dashboard' %}active{% endif %}">
+                    <span>📊</span>
+                    <span>Dashboard</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ url_for('assignments') }}" class="{% if active == 'classes' or active == 'assignments' %}active{% endif %}">
+                    <span>📚</span>
+                    <span>Assignments</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ url_for('study_planner') }}" class="{% if active == 'planner' %}active{% endif %}">
+                    <span>🗓️</span>
+                    <span>Study Planner</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ url_for('quiz') }}" class="{% if active == 'quiz' %}active{% endif %}">
+                    <span>⚔️</span>
+                    <span>Quiz Me</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ url_for('logout') }}">
+                    <span>🚪</span>
+                    <span>Logout</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+    
+    <!-- Main content -->
+    <main class="main">
+        <div class="content-wrapper">
+            {% block content %}{% endblock %}
+        </div>
+    </main>
+</div>
+</body>
+</html>

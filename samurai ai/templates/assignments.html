@@ -1,0 +1,689 @@
+{% extends "layout.html" %}
+{% set active = "classes" %}
+{% block content %}
+
+<style>
+.dashboard {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    background: #000000;
+    min-height: 100vh;
+}
+
+.classes h3 {
+    font-size: 24px;
+    margin-bottom: 20px;
+    color: #00ff41;
+    text-shadow: 0 0 10px rgba(0, 255, 65, 0.3);
+}
+
+.add-class {
+    background: linear-gradient(135deg, #00ff41 0%, #00cc33 100%);
+    color: #000;
+    border: 1px solid rgba(0, 255, 65, 0.5);
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 20px;
+    transition: all 0.3s ease;
+}
+
+.add-class:hover {
+    background: linear-gradient(135deg, #00ff41 0%, #00ff41 100%);
+    box-shadow: 0 0 15px rgba(0, 255, 65, 0.4);
+}
+
+#classList {
+    list-style: none;
+    padding: 0;
+}
+
+.class-item {
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(0, 255, 65, 0.2);
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+    transition: all 0.3s ease;
+}
+
+.class-item:hover {
+    border-color: rgba(0, 255, 65, 0.4);
+    background: rgba(0, 0, 0, 0.5);
+}
+
+.class-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 15px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid rgba(0, 255, 65, 0.2);
+}
+
+.class-name {
+    font-size: 20px;
+    font-weight: bold;
+    color: #00ff41;
+}
+
+.class-actions {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.add-assignment {
+    background: rgba(0, 255, 65, 0.1);
+    color: #00ff41;
+    border: 1px solid rgba(0, 255, 65, 0.3);
+    padding: 8px 16px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.add-assignment:hover {
+    background: rgba(0, 255, 65, 0.2);
+    border-color: rgba(0, 255, 65, 0.6);
+    box-shadow: 0 0 10px rgba(0, 255, 65, 0.2);
+}
+
+.delete-class {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    font-size: 20px;
+    color: #ff4444;
+    padding: 5px;
+    transition: all 0.3s ease;
+}
+
+.delete-class:hover {
+    transform: scale(1.1);
+    text-shadow: 0 0 10px rgba(255, 68, 68, 0.4);
+}
+
+.assignments {
+    list-style: none;
+    padding: 0;
+}
+
+.assignment-item {
+    background: rgba(0, 255, 65, 0.05);
+    border: 1px solid rgba(0, 255, 65, 0.1);
+    border-radius: 5px;
+    padding: 12px 15px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    transition: all 0.3s ease;
+    color: #e0e0e0;
+}
+
+.assignment-item:hover {
+    background: rgba(0, 255, 65, 0.08);
+    border-color: rgba(0, 255, 65, 0.2);
+}
+
+.assignment-info {
+    flex: 1;
+}
+
+.assignment-title {
+    font-weight: 500;
+    color: #00ff41;
+    margin-bottom: 4px;
+}
+
+.assignment-due {
+    font-size: 13px;
+    color: #94a3b8;
+    font-style: italic;
+}
+
+.assignment-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.start-assignment {
+    background: rgba(0, 255, 65, 0.15);
+    color: #00ff41;
+    border: 1px solid rgba(0, 255, 65, 0.3);
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.start-assignment:hover {
+    background: rgba(0, 255, 65, 0.25);
+    border-color: rgba(0, 255, 65, 0.6);
+    box-shadow: 0 0 10px rgba(0, 255, 65, 0.2);
+}
+
+.delete-assignment {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    font-size: 18px;
+    color: #ff4444;
+    padding: 4px;
+    transition: all 0.3s ease;
+}
+
+.delete-assignment:hover {
+    transform: scale(1.1);
+    text-shadow: 0 0 10px rgba(255, 68, 68, 0.4);
+}
+
+.no-assignments {
+    color: #94a3b8;
+    font-style: italic;
+    padding: 10px;
+    text-align: center;
+}
+
+.no-assignments a {
+    color: #00ff41;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.no-assignments a:hover {
+    text-shadow: 0 0 10px rgba(0, 255, 65, 0.4);
+}
+
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.8);
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-content {
+    background-color: rgba(0, 0, 0, 0.9);
+    padding: 30px;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 400px;
+    box-shadow: 0 0 30px rgba(0, 255, 65, 0.2);
+    border: 1px solid rgba(0, 255, 65, 0.2);
+}
+
+.modal-content h3 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    color: #00ff41;
+}
+
+.close {
+    color: #94a3b8;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    line-height: 20px;
+    transition: all 0.3s ease;
+}
+
+.close:hover {
+    color: #00ff41;
+    text-shadow: 0 0 10px rgba(0, 255, 65, 0.4);
+}
+
+.modal input {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid rgba(0, 255, 65, 0.3);
+    background: rgba(0, 0, 0, 0.3);
+    color: #e0e0e0;
+    border-radius: 4px;
+    font-size: 14px;
+    box-sizing: border-box;
+    transition: all 0.3s ease;
+}
+
+.modal input:focus {
+    outline: none;
+    border-color: #00ff41;
+    box-shadow: 0 0 15px rgba(0, 255, 65, 0.2);
+    background: rgba(0, 0, 0, 0.5);
+}
+
+.save-btn {
+    background: linear-gradient(135deg, #00ff41 0%, #00cc33 100%);
+    color: #000;
+    border: 1px solid rgba(0, 255, 65, 0.5);
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    width: 100%;
+    transition: all 0.3s ease;
+}
+
+.save-btn:hover {
+    background: linear-gradient(135deg, #00ff41 0%, #00ff41 100%);
+    box-shadow: 0 0 15px rgba(0, 255, 65, 0.4);
+}
+
+.focus-mode {
+    background: #000;
+    color: #00ff41;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    flex-direction: column;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 9999;
+}
+
+.focus-mode h1 {
+    font-size: 48px;
+    margin-bottom: 30px;
+    text-shadow: 0 0 20px rgba(0, 255, 65, 0.3);
+}
+
+.focus-timer {
+    font-size: 72px;
+    font-weight: bold;
+    margin-bottom: 40px;
+    font-family: monospace;
+    text-shadow: 0 0 15px rgba(0, 255, 65, 0.4);
+}
+
+.focus-actions {
+    display: flex;
+    gap: 20px;
+}
+
+.focus-btn {
+    padding: 15px 30px;
+    font-size: 16px;
+    border: 1px solid rgba(0, 255, 65, 0.3);
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.3s ease;
+}
+
+.pause-btn {
+    background: rgba(0, 255, 65, 0.1);
+    color: #00ff41;
+}
+
+.pause-btn:hover {
+    background: rgba(0, 255, 65, 0.2);
+    box-shadow: 0 0 15px rgba(0, 255, 65, 0.3);
+}
+
+.done-btn {
+    background: linear-gradient(135deg, #00ff41 0%, #00cc33 100%);
+    color: #000;
+}
+
+.done-btn:hover {
+    background: linear-gradient(135deg, #00ff41 0%, #00ff41 100%);
+    box-shadow: 0 0 15px rgba(0, 255, 65, 0.4);
+}
+
+.error-message {
+    background: rgba(255, 68, 68, 0.1);
+    color: #ff4444;
+    border: 1px solid rgba(255, 68, 68, 0.3);
+    padding: 10px;
+    border-radius: 4px;
+    margin-bottom: 10px;
+    text-align: center;
+}
+</style>
+
+<main id="assignmentsPage" class="dashboard">
+    <section class="classes">
+        <h3>🥷 Your Classes</h3>
+        <button class="add-class" id="openClassModal">+ Add Class</button>
+        <ul id="classList">
+            {% if classes %}
+                {% for c in classes %}
+                <li class="class-item" data-id="{{ c.id }}">
+                    <div class="class-header">
+                        <div class="class-name">{{ c.name }}</div>
+                        <div class="class-actions">
+                            <button class="add-assignment" data-class="{{ c.id }}">+ Add Assignment</button>
+                            <button class="delete-class" data-class="{{ c.id }}" title="Delete class">🗑️</button>
+                        </div>
+                    </div>
+
+                    <ul class="assignments">
+                        {% set has_assignments = false %}
+                        {% for a in assignments %}
+                            {% if a.class_id == c.id %}
+                                {% set has_assignments = true %}
+                                <li class="assignment-item" data-assignment="{{ a.id }}">
+                                    <div class="assignment-info">
+                                        <div class="assignment-title">{{ a.title }}</div>
+                                        <div class="assignment-due">
+                                            {% if a.due_date %}
+                                                Due: {{ a.due_date }}
+                                            {% else %}
+                                                No due date
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    <div class="assignment-actions">
+                                        <button class="start-assignment" data-id="{{ a.id }}">Start</button>
+                                        <button class="delete-assignment" data-assignment="{{ a.id }}" title="Delete assignment">🗑️</button>
+                                    </div>
+                                </li>
+                            {% endif %}
+                        {% endfor %}
+
+                        {% if not has_assignments %}
+                            <li class="no-assignments">No assignments yet</li>
+                        {% endif %}
+                    </ul>
+                </li>
+                {% endfor %}
+            {% else %}
+                <li class="no-assignments">No classes yet. <a href="#" id="openClassModalLink">Add your first class!</a></li>
+            {% endif %}
+        </ul>
+    </section>
+</main>
+
+<!-- Modals -->
+<div id="classModal" class="modal">
+    <div class="modal-content">
+        <span class="close" id="closeClassModal">&times;</span>
+        <h3>Add a Class</h3>
+        <div id="classError" class="error-message" style="display:none;"></div>
+        <input type="text" id="className" placeholder="Class name (e.g., Mathematics, Physics)">
+        <button class="save-btn" id="saveClass">Save</button>
+    </div>
+</div>
+
+<div id="assignmentModal" class="modal">
+    <div class="modal-content">
+        <span class="close" id="closeAssignmentModal">&times;</span>
+        <h3>Add Assignment</h3>
+        <div id="assignmentError" class="error-message" style="display:none;"></div>
+        <input type="text" id="assignmentTitle" placeholder="Assignment title">
+        <input type="date" id="assignmentDue">
+        <button class="save-btn" id="saveAssignment">Save</button>
+    </div>
+</div>
+
+<script>
+(() => {
+    // Modal and buttons
+    const classModal = document.getElementById("classModal");
+    const assignmentModal = document.getElementById("assignmentModal");
+    const openClassModal = document.getElementById("openClassModal");
+    const openClassModalLink = document.getElementById("openClassModalLink");
+    const closeClassModal = document.getElementById("closeClassModal");
+    const closeAssignmentModal = document.getElementById("closeAssignmentModal");
+    const saveClass = document.getElementById("saveClass");
+    const saveAssignment = document.getElementById("saveAssignment");
+    let selectedClassId = null;
+
+    // Helper to show errors
+    function showError(containerId, message) {
+        const errorDiv = document.getElementById(containerId);
+        errorDiv.textContent = message;
+        errorDiv.style.display = "block";
+        setTimeout(() => {
+            errorDiv.style.display = "none";
+        }, 5000);
+    }
+
+    // Open class modal
+    if (openClassModal) {
+        openClassModal.onclick = () => {
+            document.getElementById("className").value = "";
+            document.getElementById("classError").style.display = "none";
+            classModal.style.display = "flex";
+        };
+    }
+    
+    if (openClassModalLink) {
+        openClassModalLink.onclick = (e) => {
+            e.preventDefault();
+            document.getElementById("className").value = "";
+            document.getElementById("classError").style.display = "none";
+            classModal.style.display = "flex";
+        };
+    }
+
+    // Close modals
+    closeClassModal.onclick = () => classModal.style.display = "none";
+    closeAssignmentModal.onclick = () => assignmentModal.style.display = "none";
+    
+    window.onclick = e => {
+        if (e.target === classModal) classModal.style.display = "none";
+        if (e.target === assignmentModal) assignmentModal.style.display = "none";
+    };
+
+    // Add class
+    saveClass.onclick = async () => {
+        const name = document.getElementById("className").value;
+        if (!name.trim()) {
+            showError("classError", "Please enter a class name");
+            return;
+        }
+        
+        try {
+            const res = await fetch("/add_class", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ name: name.trim() })
+            });
+            
+            const data = await res.json();
+            
+            if (res.ok && data.success) {
+                location.reload();
+            } else {
+                showError("classError", data.error || "Failed to add class");
+            }
+        } catch (err) {
+            showError("classError", "Network error: " + err.message);
+        }
+    };
+
+    // Open add-assignment modal for each class
+    document.querySelectorAll(".add-assignment").forEach(btn => {
+        btn.onclick = () => {
+            selectedClassId = btn.dataset.class;
+            document.getElementById("assignmentTitle").value = "";
+            document.getElementById("assignmentDue").value = "";
+            document.getElementById("assignmentError").style.display = "none";
+            assignmentModal.style.display = "flex";
+        };
+    });
+
+    // Save assignment
+    saveAssignment.onclick = async () => {
+        const title = document.getElementById("assignmentTitle").value;
+        const due_date = document.getElementById("assignmentDue").value;
+        
+        if (!title.trim()) {
+            showError("assignmentError", "Please enter an assignment title");
+            return;
+        }
+        
+        if (!due_date) {
+            showError("assignmentError", "Please select a due date");
+            return;
+        }
+
+        try {
+            const res = await fetch("/add_assignment", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ 
+                    class_id: parseInt(selectedClassId), 
+                    title: title.trim(), 
+                    due_date: due_date 
+                })
+            });
+
+            const data = await res.json();
+            
+            if (res.ok && data.success) {
+                location.reload();
+            } else {
+                showError("assignmentError", data.error || "Failed to add assignment");
+            }
+        } catch (err) {
+            showError("assignmentError", "Network error: " + err.message);
+        }
+    };
+
+    // Delete class
+    document.querySelectorAll(".delete-class").forEach(btn => {
+        btn.onclick = async () => {
+            if (!confirm("Are you sure you want to delete this class? All assignments will be lost!")) return;
+            
+            try {
+                const res = await fetch(`/delete_class/${btn.dataset.class}`, { 
+                    method: "DELETE" 
+                });
+                
+                if (res.ok) {
+                    location.reload();
+                } else {
+                    alert("Error deleting class");
+                }
+            } catch (err) {
+                alert("Error deleting class: " + err.message);
+            }
+        };
+    });
+
+    // Delete assignment
+    document.querySelectorAll(".delete-assignment").forEach(btn => {
+        btn.onclick = async () => {
+            if (!confirm("Delete this assignment?")) return;
+            
+            try {
+                const res = await fetch(`/delete_assignment/${btn.dataset.assignment}`, { 
+                    method: "POST" 
+                });
+                
+                if (res.ok) {
+                    location.reload();
+                } else {
+                    alert("Error deleting assignment");
+                }
+            } catch (err) {
+                alert("Error deleting assignment: " + err.message);
+            }
+        };
+    });
+
+    // Start assignment - Focus mode with timer
+    document.querySelectorAll(".start-assignment").forEach(btn => {
+        btn.onclick = () => {
+            const assignmentId = btn.dataset.id;
+            let seconds = 0;
+            let isPaused = false;
+            let timerInterval;
+            
+            // Create focus mode UI
+            const focusMode = document.createElement('div');
+            focusMode.className = 'focus-mode';
+            focusMode.innerHTML = `
+                <h1>🥷 Stay Focused</h1>
+                <div class="focus-timer" id="timer">00:00:00</div>
+                <div class="focus-actions">
+                    <button class="focus-btn pause-btn" id="pauseBtn">Pause</button>
+                    <button class="focus-btn done-btn" id="doneBtn">Done</button>
+                </div>
+            `;
+            document.body.appendChild(focusMode);
+            
+            // Format time helper
+            function formatTime(totalSeconds) {
+                const hours = Math.floor(totalSeconds / 3600);
+                const minutes = Math.floor((totalSeconds % 3600) / 60);
+                const secs = totalSeconds % 60;
+                return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+            }
+            
+            // Start timer
+            function startTimer() {
+                timerInterval = setInterval(() => {
+                    if (!isPaused) {
+                        seconds++;
+                        document.getElementById('timer').textContent = formatTime(seconds);
+                    }
+                }, 1000);
+            }
+            
+            startTimer();
+            
+            // Pause button
+            document.getElementById('pauseBtn').onclick = () => {
+                isPaused = !isPaused;
+                document.getElementById('pauseBtn').textContent = isPaused ? 'Resume' : 'Pause';
+            };
+            
+            // Done button
+            document.getElementById('doneBtn').onclick = async () => {
+                clearInterval(timerInterval);
+                const timeMinutes = Math.ceil(seconds / 60);
+                
+                try {
+                    const res = await fetch("/complete_assignment", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ 
+                            assignment_id: assignmentId,
+                            completed: true,
+                            time_spent_minutes: timeMinutes
+                        })
+                    });
+                    
+                    if (res.ok) {
+                        location.reload();
+                    } else {
+                        alert("Error completing assignment");
+                        location.reload();
+                    }
+                } catch (err) {
+                    alert("Error completing assignment: " + err.message);
+                    location.reload();
+                }
+            };
+        };
+    });
+
+})();
+</script>
+
+{% endblock %}

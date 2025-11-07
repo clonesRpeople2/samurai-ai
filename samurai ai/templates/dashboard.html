@@ -1,0 +1,709 @@
+{% extends "layout.html" %}
+{% set active = "dashboard" %}
+{% block content %}
+
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+.dashboard-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 20px;
+    background: #000000;
+    min-height: 100vh;
+}
+
+.dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    padding: 20px;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(0, 255, 65, 0.3);
+    border-radius: 12px;
+    backdrop-filter: blur(10px);
+}
+
+.welcome-section h2 {
+    font-size: 28px;
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 5px;
+    font-weight: 700;
+    text-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
+}
+
+.user-stats {
+    display: flex;
+    gap: 20px;
+    font-size: 14px;
+    color: #a0aec0;
+}
+
+.stat-badge {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(16, 185, 129, 0.05) 100%);
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-weight: 600;
+    border: 1px solid rgba(16, 185, 129, 0.2);
+    color: #10b981;
+    transition: all 0.3s ease;
+}
+
+.stat-badge:hover {
+    border-color: rgba(16, 185, 129, 0.4);
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(16, 185, 129, 0.08) 100%);
+}
+
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.card {
+    background: linear-gradient(135deg, rgba(30, 41, 59, 0.8) 0%, rgba(15, 21, 53, 0.8) 100%);
+    border-radius: 12px;
+    padding: 24px;
+    border: 1px solid rgba(16, 185, 129, 0.1);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+}
+
+.card:hover {
+    border-color: rgba(16, 185, 129, 0.2);
+    box-shadow: 0 12px 48px rgba(16, 185, 129, 0.1);
+}
+
+.card h3 {
+    margin: 0 0 15px 0;
+    font-size: 18px;
+    color: #10b981;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+    text-shadow: 0 0 10px rgba(16, 185, 129, 0.2);
+}
+
+.workload-overview {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+}
+
+.workload-item {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, rgba(16, 185, 129, 0.03) 100%);
+    padding: 15px;
+    border-radius: 10px;
+    text-align: center;
+    border: 1px solid rgba(16, 185, 129, 0.1);
+    transition: all 0.3s ease;
+}
+
+.workload-item:hover {
+    border-color: rgba(16, 185, 129, 0.3);
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.12) 0%, rgba(16, 185, 129, 0.05) 100%);
+}
+
+.workload-number {
+    font-size: 32px;
+    font-weight: 700;
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.workload-item.overdue .workload-number {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.workload-item.this-week .workload-number {
+    background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.workload-label {
+    font-size: 12px;
+    color: #94a3b8;
+    margin-top: 5px;
+    font-weight: 500;
+}
+
+.reminder-list {
+    list-style: none;
+    padding: 0;
+    max-height: 350px;
+    overflow-y: auto;
+}
+
+.reminder-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.reminder-list::-webkit-scrollbar-track {
+    background: rgba(16, 185, 129, 0.05);
+    border-radius: 10px;
+}
+
+.reminder-list::-webkit-scrollbar-thumb {
+    background: rgba(16, 185, 129, 0.3);
+    border-radius: 10px;
+}
+
+.reminder-item {
+    padding: 12px;
+    margin-bottom: 8px;
+    border-radius: 8px;
+    border-left: 4px solid;
+    background: rgba(16, 185, 129, 0.05);
+    color: #cbd5e1;
+    font-size: 13px;
+    transition: all 0.3s ease;
+}
+
+.reminder-item:hover {
+    background: rgba(16, 185, 129, 0.08);
+}
+
+.reminder-item.high {
+    border-left-color: #ef4444;
+    background: rgba(239, 68, 68, 0.08);
+    color: #fca5a5;
+}
+
+.reminder-item.medium {
+    border-left-color: #f97316;
+    background: rgba(249, 115, 22, 0.08);
+    color: #fdba74;
+}
+
+.reminder-item.low {
+    border-left-color: #10b981;
+    background: rgba(16, 185, 129, 0.08);
+    color: #a7f3d0;
+}
+
+.reminder-item.critical {
+    border-left-color: #ef4444;
+    background: rgba(239, 68, 68, 0.1);
+    color: #fca5a5;
+    font-weight: 600;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.8; }
+}
+
+.optimal-times {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.time-slot {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.2) 0%, rgba(16, 185, 129, 0.05) 100%);
+    color: #10b981;
+    padding: 12px;
+    border-radius: 8px;
+    text-align: center;
+    font-weight: 600;
+    border: 1px solid rgba(16, 185, 129, 0.2);
+    transition: all 0.3s ease;
+}
+
+.time-slot:hover {
+    border-color: rgba(16, 185, 129, 0.4);
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.3) 0%, rgba(16, 185, 129, 0.1) 100%);
+}
+
+.assignments-section {
+    margin-top: 30px;
+}
+
+.assignment-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 15px;
+}
+
+.assignment-card {
+    background: linear-gradient(135deg, rgba(30, 41, 59, 0.8) 0%, rgba(15, 21, 53, 0.8) 100%);
+    border-radius: 10px;
+    padding: 18px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    border-left: 4px solid #10b981;
+    border: 1px solid rgba(16, 185, 129, 0.1);
+    transition: all 0.3s ease;
+    animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.assignment-card:hover {
+    border-color: rgba(16, 185, 129, 0.4);
+    box-shadow: 0 12px 48px rgba(16, 185, 129, 0.15);
+    transform: translateY(-2px);
+}
+
+.assignment-card.overdue {
+    border-left-color: #ef4444;
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.08) 0%, rgba(15, 21, 53, 0.8) 100%);
+    border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+.assignment-card.completed {
+    opacity: 0;
+    animation: slideOut 0.3s ease-out forwards;
+}
+
+@keyframes slideOut {
+    to {
+        opacity: 0;
+        transform: translateX(30px);
+    }
+}
+
+.assignment-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
+    margin-bottom: 10px;
+}
+
+.assignment-title {
+    font-weight: 600;
+    color: #10b981;
+    font-size: 16px;
+}
+
+.assignment-class {
+    font-size: 12px;
+    color: #94a3b8;
+    background: rgba(16, 185, 129, 0.08);
+    padding: 4px 10px;
+    border-radius: 12px;
+    margin-top: 5px;
+    border: 1px solid rgba(16, 185, 129, 0.1);
+}
+
+.assignment-due {
+    font-size: 13px;
+    color: #cbd5e1;
+    margin: 8px 0;
+}
+
+.assignment-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.btn {
+    padding: 8px 14px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    flex: 1;
+    text-align: center;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+    border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.btn-primary:hover {
+    border-color: rgba(16, 185, 129, 0.6);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    transform: translateY(-1px);
+}
+
+.btn-success {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+    border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.btn-success:hover {
+    border-color: rgba(16, 185, 129, 0.6);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    transform: translateY(-1px);
+}
+
+.btn-danger {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    color: white;
+    border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.btn-danger:hover {
+    border-color: rgba(239, 68, 68, 0.6);
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+    transform: translateY(-1px);
+}
+
+.generate-plan-btn {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    padding: 12px 24px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 600;
+    margin-top: 15px;
+    transition: all 0.3s ease;
+    width: 100%;
+}
+
+.generate-plan-btn:hover {
+    border-color: rgba(16, 185, 129, 0.6);
+    box-shadow: 0 6px 20px rgba(16, 185, 129, 0.3);
+    transform: translateY(-2px);
+}
+
+.generate-plan-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.loading {
+    text-align: center;
+    padding: 20px;
+    color: #94a3b8;
+    font-size: 14px;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 40px;
+    color: #94a3b8;
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.05) 0%, rgba(16, 185, 129, 0.02) 100%);
+    border-radius: 10px;
+    border: 1px dashed rgba(16, 185, 129, 0.1);
+}
+
+.empty-state a {
+    color: #10b981;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.empty-state a:hover {
+    color: #059669;
+    text-decoration: underline;
+}
+
+#planStatus {
+    min-height: 20px;
+    font-size: 13px;
+}
+
+#planStatus a {
+    color: #10b981;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+#planStatus a:hover {
+    color: #059669;
+}
+
+@media (max-width: 768px) {
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .assignment-grid {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+
+<div class="dashboard-container">
+    <div class="dashboard-header">
+        <div class="welcome-section">
+            <h2>Welcome back, {{ user.name }}! 🥷</h2>
+            <div class="user-stats">
+                <span class="stat-badge">⭐ Level {{ user.level }}</span>
+                <span class="stat-badge">💎 {{ user.xp }} XP</span>
+                <span class="stat-badge">🔥 {{ user.streak }} day streak</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="dashboard-grid">
+        <!-- Workload Analysis -->
+        <div class="card">
+            <h3>📊 Workload Analysis</h3>
+            <div class="workload-overview" id="workloadOverview">
+                <div class="loading">Loading workload data...</div>
+            </div>
+        </div>
+
+        <!-- Smart Reminders -->
+        <div class="card">
+            <h3>🔔 Smart Reminders</h3>
+            <ul class="reminder-list" id="reminderList">
+                <li class="loading">Loading reminders...</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="dashboard-grid">
+        <!-- Optimal Study Times -->
+        <div class="card">
+            <h3>⏰ Your Best Study Times</h3>
+            <p style="font-size: 13px; color: #94a3b8; margin-bottom: 15px;">
+                Based on your study patterns, these are your most productive hours:
+            </p>
+            <div class="optimal-times" id="optimalTimes">
+                <div class="loading">Analyzing your study habits...</div>
+            </div>
+        </div>
+
+        <!-- AI Study Planner -->
+        <div class="card">
+            <h3>🤖 AI Study Planner</h3>
+            <p style="font-size: 13px; color: #94a3b8; margin-bottom: 10px;">
+                Let AI create a personalized study schedule based on your assignments and habits.
+            </p>
+            <button class="generate-plan-btn" onclick="generateStudyPlan()">
+                Generate Smart Schedule
+            </button>
+            <div id="planStatus" style="margin-top: 10px; font-size: 13px;"></div>
+        </div>
+    </div>
+
+    <!-- Assignments Section -->
+    <div class="assignments-section">
+        <div class="card">
+            <h3>📚 Your Assignments</h3>
+            <div class="assignment-grid" id="assignmentGrid">
+                {% if assignments %}
+                    {% for a in assignments %}
+                        {% if not a.completed %}
+                        <div class="assignment-card {% if a.overdue %}overdue{% endif %}" data-assignment-id="{{ a.id }}">
+                            <div class="assignment-card-header">
+                                <div>
+                                    <div class="assignment-title">{{ a.title }}</div>
+                                    <div class="assignment-class">
+                                        {% for c in classes %}
+                                            {% if c.id == a.class_id %}{{ c.name }}{% endif %}
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="assignment-due">
+                                {% if a.overdue %}
+                                    ⚠️ <strong>Overdue:</strong> {{ a.due_date }}
+                                {% else %}
+                                    📅 Due: {{ a.due_date if a.due_date else 'No deadline' }}
+                                {% endif %}
+                            </div>
+                            <div class="assignment-actions">
+                                <button class="btn btn-primary" onclick="startAssignment({{ a.id }}, '{{ a.title }}')">
+                                    Start
+                                </button>
+                                <button class="btn btn-success" onclick="markComplete({{ a.id }})">
+                                    ✓ Done
+                                </button>
+                            </div>
+                        </div>
+                        {% endif %}
+                    {% endfor %}
+                {% else %}
+                    <div class="empty-state">
+                        <p>No assignments yet. <a href="/assignments">Add your first assignment!</a></p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Load workload analysis
+async function loadWorkload() {
+    try {
+        const res = await fetch('/api/ai/analyze_workload');
+        const data = await res.json();
+        
+        const html = `
+            <div class="workload-item overdue">
+                <div class="workload-number">${data.overdue}</div>
+                <div class="workload-label">Overdue</div>
+            </div>
+            <div class="workload-item this-week">
+                <div class="workload-number">${data.this_week}</div>
+                <div class="workload-label">This Week</div>
+            </div>
+            <div class="workload-item">
+                <div class="workload-number">${data.next_week}</div>
+                <div class="workload-label">Next Week</div>
+            </div>
+            <div class="workload-item">
+                <div class="workload-number">${data.total_assignments}</div>
+                <div class="workload-label">Total Active</div>
+            </div>
+        `;
+        
+        document.getElementById('workloadOverview').innerHTML = html;
+    } catch (err) {
+        console.error('Error loading workload:', err);
+    }
+}
+
+// Load reminders
+async function loadReminders() {
+    try {
+        const res = await fetch('/api/ai/get_reminders');
+        const data = await res.json();
+        
+        if (data.reminders.length === 0) {
+            document.getElementById('reminderList').innerHTML = '<li style="text-align: center; padding: 20px; color: #10b981;">✅ No overdue assignments!</li>';
+            return;
+        }
+        
+        const html = data.reminders.map(r => `
+            <li class="reminder-item ${r.urgency}">
+                ${r.message}
+            </li>
+        `).join('');
+        
+        document.getElementById('reminderList').innerHTML = html;
+    } catch (err) {
+        console.error('Error loading reminders:', err);
+    }
+}
+
+// Load optimal study times
+async function loadOptimalTimes() {
+    try {
+        const res = await fetch('/api/ai/optimal_study_times');
+        const data = await res.json();
+        
+        const html = data.recommendations.map(time => `
+            <div class="time-slot">🎯 ${time}</div>
+        `).join('');
+        
+        document.getElementById('optimalTimes').innerHTML = html;
+    } catch (err) {
+        console.error('Error loading optimal times:', err);
+        document.getElementById('optimalTimes').innerHTML = `
+            <div class="time-slot">🎯 14:00 - 16:00</div>
+            <div class="time-slot">🎯 16:00 - 18:00</div>
+            <div class="time-slot">🎯 20:00 - 22:00</div>
+        `;
+    }
+}
+
+// Generate AI study plan
+async function generateStudyPlan() {
+    const btn = event.target;
+    const status = document.getElementById('planStatus');
+    
+    btn.disabled = true;
+    btn.textContent = 'Generating...';
+    status.innerHTML = '<span style="color: #10b981;">🤖 AI is creating your personalized schedule...</span>';
+    
+    try {
+        const res = await fetch('/generate_plan', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' }
+        });
+        
+        const data = await res.json();
+        
+        if (data.success) {
+            status.innerHTML = '<span style="color: #10b981;">✅ Schedule created! View it in <a href="/study_planner">Study Planner</a></span>';
+        } else {
+            status.innerHTML = `<span style="color: #ef4444;">❌ ${data.message}</span>`;
+        }
+    } catch (err) {
+        status.innerHTML = '<span style="color: #ef4444;">❌ Error generating plan</span>';
+    } finally {
+        btn.disabled = false;
+        btn.textContent = 'Generate Smart Schedule';
+    }
+}
+
+// Start assignment
+function startAssignment(id, title) {
+    window.location.href = `/assignments#start-${id}`;
+}
+
+// Mark complete
+async function markComplete(id) {
+    try {
+        const res = await fetch('/complete_assignment', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ assignment_id: id, completed: true, time_spent_minutes: 0 })
+        });
+        
+        if (res.ok) {
+            // Smooth removal animation
+            const card = document.querySelector(`[data-assignment-id="${id}"]`);
+            if (card) {
+                card.classList.add('completed');
+                setTimeout(() => {
+                    card.remove();
+                    // If no more assignments, show empty state
+                    const grid = document.getElementById('assignmentGrid');
+                    if (grid.children.length === 0) {
+                        grid.innerHTML = '<div class="empty-state"><p>🎉 All caught up! No pending assignments.</p></div>';
+                    }
+                }, 300);
+            }
+        } else {
+            alert('Error completing assignment');
+        }
+    } catch (err) {
+        alert('Error completing assignment');
+        console.error(err);
+    }
+}
+
+// Load all data on page load
+document.addEventListener('DOMContentLoaded', () => {
+    loadWorkload();
+    loadReminders();
+    loadOptimalTimes();
+});
+</script>
+
+{% endblock %}

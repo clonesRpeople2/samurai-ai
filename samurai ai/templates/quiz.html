@@ -1,0 +1,347 @@
+{% extends "layout.html" %}
+{% set active = "quiz" %}
+{% block content %}
+
+<style>
+.quiz-container {
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.quiz-header {
+    text-align: center;
+    margin-bottom: 40px;
+    padding: 40px 20px;
+    background: rgba(0, 255, 65, 0.05);
+    border-radius: 15px;
+    border: 2px solid rgba(0, 255, 65, 0.2);
+}
+
+.quiz-header h2 {
+    font-size: 42px;
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+}
+
+.quiz-header p {
+    font-size: 18px;
+    color: #00ff41;
+    margin-bottom: 10px;
+}
+
+.quiz-subtitle {
+    font-size: 14px;
+    color: #888;
+    font-style: italic;
+}
+
+/* Feature cards */
+.quiz-features {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 25px;
+    margin-bottom: 40px;
+}
+
+.feature-card {
+    background: linear-gradient(135deg, rgba(0, 255, 65, 0.1) 0%, rgba(0, 204, 51, 0.05) 100%);
+    border: 2px solid rgba(0, 255, 65, 0.3);
+    border-radius: 15px;
+    padding: 30px;
+    text-align: center;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.feature-card::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(0, 255, 65, 0.1) 0%, transparent 70%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.feature-card:hover {
+    transform: translateY(-5px);
+    border-color: #00ff41;
+    box-shadow: 0 10px 30px rgba(0, 255, 65, 0.2);
+}
+
+.feature-card:hover::before {
+    opacity: 1;
+}
+
+.feature-icon {
+    font-size: 48px;
+    margin-bottom: 15px;
+    display: block;
+    position: relative;
+    z-index: 1;
+}
+
+.feature-card h3 {
+    color: #00ff41;
+    font-size: 20px;
+    margin-bottom: 10px;
+    position: relative;
+    z-index: 1;
+}
+
+.feature-card p {
+    color: #b0b0b0;
+    font-size: 14px;
+    line-height: 1.6;
+    position: relative;
+    z-index: 1;
+}
+
+/* Coming soon section */
+.coming-soon {
+    text-align: center;
+    padding: 60px 20px;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 15px;
+    border: 2px dashed rgba(0, 255, 65, 0.3);
+    margin-top: 40px;
+}
+
+.coming-soon-icon {
+    font-size: 80px;
+    margin-bottom: 20px;
+    animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-15px); }
+}
+
+.coming-soon h3 {
+    color: #00ff41;
+    font-size: 32px;
+    margin-bottom: 15px;
+}
+
+.coming-soon p {
+    color: #888;
+    font-size: 16px;
+    max-width: 600px;
+    margin: 0 auto 30px;
+}
+
+.notify-btn {
+    background: linear-gradient(135deg, #00ff41 0%, #00cc33 100%);
+    color: #000;
+    border: none;
+    padding: 15px 40px;
+    border-radius: 50px;
+    font-weight: 700;
+    cursor: pointer;
+    font-size: 16px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: all 0.3s ease;
+    box-shadow: 0 10px 30px rgba(0, 255, 65, 0.3);
+}
+
+.notify-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 15px 40px rgba(0, 255, 65, 0.5);
+}
+
+/* Progress indicator */
+.development-progress {
+    margin-top: 40px;
+    padding: 30px;
+    background: rgba(0, 255, 65, 0.05);
+    border-radius: 15px;
+    border: 1px solid rgba(0, 255, 65, 0.2);
+}
+
+.progress-title {
+    color: #00ff41;
+    font-size: 18px;
+    margin-bottom: 20px;
+    font-weight: 600;
+}
+
+.progress-item {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 15px;
+    padding: 15px;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 10px;
+    border: 1px solid rgba(0, 255, 65, 0.1);
+}
+
+.progress-check {
+    font-size: 24px;
+}
+
+.progress-item.completed {
+    border-color: rgba(0, 255, 65, 0.3);
+}
+
+.progress-item.in-progress {
+    border-color: rgba(255, 165, 0, 0.3);
+}
+
+.progress-item.planned {
+    opacity: 0.6;
+}
+
+.progress-label {
+    flex: 1;
+    color: #e0e0e0;
+    font-size: 14px;
+}
+
+.progress-status {
+    font-size: 12px;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.status-completed {
+    background: rgba(0, 255, 65, 0.2);
+    color: #00ff41;
+}
+
+.status-in-progress {
+    background: rgba(255, 165, 0, 0.2);
+    color: #ffa500;
+}
+
+.status-planned {
+    background: rgba(100, 100, 100, 0.2);
+    color: #888;
+}
+</style>
+
+<div class="quiz-container">
+    <!-- Header -->
+    <div class="quiz-header">
+        <h2>
+            <span>⚔️</span>
+            <span>Quiz Dojo</span>
+            <span>⚔️</span>
+        </h2>
+        <p>Test Your Knowledge, Sharpen Your Mind</p>
+        <p class="quiz-subtitle">Where Ninjas Train Their Intellect</p>
+    </div>
+
+    <!-- Feature Cards -->
+    <div class="quiz-features">
+        <div class="feature-card">
+            <span class="feature-icon">🎯</span>
+            <h3>AI-Generated Quizzes</h3>
+            <p>Smart questions based on your study material and weak points</p>
+        </div>
+        
+        <div class="feature-card">
+            <span class="feature-icon">📊</span>
+            <h3>Progress Tracking</h3>
+            <p>Monitor your mastery level and identify areas for improvement</p>
+        </div>
+        
+        <div class="feature-card">
+            <span class="feature-icon">⚡</span>
+            <h3>Instant Feedback</h3>
+            <p>Get immediate explanations and learn from every answer</p>
+        </div>
+        
+        <div class="feature-card">
+            <span class="feature-icon">🏆</span>
+            <h3>XP & Achievements</h3>
+            <p>Earn points and unlock ninja ranks as you master subjects</p>
+        </div>
+    </div>
+
+    <!-- Coming Soon -->
+    <div class="coming-soon">
+        <div class="coming-soon-icon">🥷</div>
+        <h3>Training Ground Under Construction</h3>
+        <p>
+            Our ninja masters are crafting the ultimate quiz experience. 
+            Soon you'll be able to test your knowledge with AI-powered questions, 
+            track your progress, and earn your ninja ranks!
+        </p>
+        <button class="notify-btn" onclick="showNotification()">
+            Notify Me When Ready
+        </button>
+    </div>
+
+    <!-- Development Progress -->
+    <div class="development-progress">
+        <div class="progress-title">🛠️ Feature Development Status</div>
+        
+        <div class="progress-item completed">
+            <span class="progress-check">✅</span>
+            <span class="progress-label">AI Study Plan Generation</span>
+            <span class="progress-status status-completed">Live</span>
+        </div>
+        
+        <div class="progress-item completed">
+            <span class="progress-check">✅</span>
+            <span class="progress-label">Focus Mode Timer</span>
+            <span class="progress-status status-completed">Live</span>
+        </div>
+        
+        <div class="progress-item completed">
+            <span class="progress-check">✅</span>
+            <span class="progress-label">Smart Reminders</span>
+            <span class="progress-status status-completed">Live</span>
+        </div>
+        
+        <div class="progress-item in-progress">
+            <span class="progress-check">⚙️</span>
+            <span class="progress-label">AI Quiz Generation</span>
+            <span class="progress-status status-in-progress">In Progress</span>
+        </div>
+        
+        <div class="progress-item planned">
+            <span class="progress-check">📋</span>
+            <span class="progress-label">Spaced Repetition System</span>
+            <span class="progress-status status-planned">Planned</span>
+        </div>
+        
+        <div class="progress-item planned">
+            <span class="progress-check">📋</span>
+            <span class="progress-label">Flashcard Integration</span>
+            <span class="progress-status status-planned">Planned</span>
+        </div>
+    </div>
+</div>
+
+<script>
+function showNotification() {
+    const btn = event.target;
+    const originalText = btn.textContent;
+    
+    btn.style.background = 'linear-gradient(135deg, #00cc33 0%, #00ff41 100%)';
+    btn.textContent = '✓ You\'ll be notified!';
+    
+    setTimeout(() => {
+        btn.style.background = 'linear-gradient(135deg, #00ff41 0%, #00cc33 100%)';
+        btn.textContent = originalText;
+    }, 2000);
+    
+    // Here you could add actual notification logic
+    console.log('User wants to be notified about Quiz feature');
+}
+</script>
+
+{% endblock %}

@@ -1,0 +1,120 @@
+body {
+    background: #E8F5E9;
+    font-family: 'Georgia', serif;
+    color: #2E7D32;
+    margin: 0;
+    padding: 20px;
+}
+
+header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+header h1 {
+    font-family: 'Papyrus', cursive;
+    font-size: 36px;
+    color: #1B5E20;
+}
+
+.ninja-icon {
+    height: 50px;
+    width: 50px;
+}
+
+.user-info {
+    margin-bottom: 30px;
+}
+
+.progress-bar {
+    background-color: #C8E6C9;
+    border-radius: 12px;
+    height: 25px;
+    width: 300px;
+    margin-top: 5px;
+}
+
+.progress {
+    background: linear-gradient(90deg, #66BB6A, #2E7D32);
+    height: 100%;
+    border-radius: 12px;
+}
+
+.tasks {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.task-card {
+    border: 2px solid #4CAF50;
+    border-radius: 10px;
+    padding: 15px;
+}
+
+.task-completed {
+    background-color: #2E7D32;
+    color: white;
+}
+
+.task-in_progress {
+    background-color: #AED581;
+    color: black;
+}
+
+.task-not_started {
+    background-color: #F0EAD6;
+    color: black;
+}
+
+button {
+    background-color: #66BB6A;
+    color: white;
+    border: none;
+    padding: 7px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #2E7D32;
+}
+
+.classes-section {
+    padding: 20px;
+}
+
+.class-card {
+    border: 2px solid #4CAF50; /* bamboo green */
+    border-radius: 12px;
+    margin: 10px 0;
+    padding: 15px;
+    background: #e8f5e9; /* light green */
+}
+
+.class-card h3 {
+    margin: 0 0 10px 0;
+    font-family: 'Verdana', sans-serif;
+}
+
+.class-card ul {
+    list-style: none;
+    padding-left: 0;
+}
+
+.class-card li {
+    margin-bottom: 5px;
+}
+
+.class-card form input, 
+.class-card form button {
+    margin-top: 5px;
+    padding: 5px;
+}
+
+form input[name="class_name"], form button {
+    padding: 8px;
+    margin: 5px 0;
+}

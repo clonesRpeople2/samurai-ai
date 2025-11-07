@@ -1,0 +1,30 @@
+# Core Flask
+Flask==3.0.0
+Flask-Login==0.6.3
+
+# Authentication
+msal==1.26.0
+google-auth==2.25.2
+google-auth-oauthlib==1.2.0
+google-auth-httplib2==0.2.0
+
+# Environment & Config
+python-dotenv==1.0.0
+
+# HTTP Requests
+requests==2.31.0
+
+# Data Processing & ML
+numpy==1.26.2
+
+# Database (SQLite is built into Python)
+# No additional package needed
+
+# Optional: For better performance
+gunicorn==21.2.0  # For production deployment
+
+# Development (optional)
+pytest==7.4.3
+pytest-flask==1.3.0
+black==23.12.1
+flake8==7.0.0

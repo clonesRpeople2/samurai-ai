@@ -1,0 +1,397 @@
+{% extends "layout.html" %}
+{% set active = "planner" %}
+{% block content %}
+
+<style>
+.planner-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.planner-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.planner-header h2 {
+    font-size: 28px;
+    color: #333;
+    margin: 0;
+}
+
+.planner-description {
+    color: #666;
+    font-size: 14px;
+    margin-top: 5px;
+}
+
+.generate-btn {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+}
+
+.generate-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.generate-btn:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.status-message {
+    margin: 15px 0;
+    padding: 12px;
+    border-radius: 6px;
+    font-size: 14px;
+}
+
+.status-message.success {
+    background: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.status-message.error {
+    background: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+.status-message.info {
+    background: #d1ecf1;
+    color: #0c5460;
+    border: 1px solid #bee5eb;
+}
+
+.calendar-card {
+    background: white;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* FullCalendar Custom Styles */
+#calendar {
+    margin-top: 20px;
+}
+
+.fc-event {
+    border: none;
+    padding: 4px 8px;
+    cursor: pointer;
+}
+
+.fc-event-title {
+    font-weight: 500;
+}
+
+.fc-toolbar-title {
+    font-size: 24px !important;
+    color: #333;
+}
+
+.fc-button-primary {
+    background: #2196F3 !important;
+    border-color: #2196F3 !important;
+}
+
+.fc-button-primary:hover {
+    background: #1976D2 !important;
+}
+
+.stats-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.stat-card {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 8px;
+    text-align: center;
+}
+
+.stat-number {
+    font-size: 28px;
+    font-weight: bold;
+    color: #2196F3;
+}
+
+.stat-label {
+    font-size: 13px;
+    color: #666;
+    margin-top: 5px;
+}
+</style>
+
+<div class="planner-container">
+    <div class="planner-header">
+        <div>
+            <h2>🗓 AI Study Planner</h2>
+            <p class="planner-description">Plan your study week smartly with SAMURAI AI 🤖</p>
+        </div>
+        <button id="generatePlan" class="generate-btn">
+            <span>🤖</span>
+            <span>Generate AI Study Plan</span>
+        </button>
+    </div>
+
+    <div id="statusMessage"></div>
+
+    <div class="stats-row" id="planStats" style="display: none;">
+        <div class="stat-card">
+            <div class="stat-number" id="totalBlocks">0</div>
+            <div class="stat-label">Study Blocks</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number" id="totalHours">0</div>
+            <div class="stat-label">Total Hours</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number" id="totalAssignments">0</div>
+            <div class="stat-label">Assignments</div>
+        </div>
+    </div>
+
+    <div class="calendar-card">
+        <div id="calendar"></div>
+    </div>
+</div>
+
+<!-- FullCalendar -->
+<link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.9/index.global.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.9/index.global.min.js"></script>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    let calendar;
+    
+    // Show status message
+    function showStatus(message, type = 'info') {
+        const statusDiv = document.getElementById('statusMessage');
+        statusDiv.innerHTML = `<div class="status-message ${type}">${message}</div>`;
+        
+        if (type === 'success') {
+            setTimeout(() => {
+                statusDiv.innerHTML = '';
+            }, 5000);
+        }
+    }
+
+    // Update statistics
+    function updateStats(events) {
+        if (events.length === 0) {
+            document.getElementById('planStats').style.display = 'none';
+            return;
+        }
+
+        document.getElementById('planStats').style.display = 'grid';
+        document.getElementById('totalBlocks').textContent = events.length;
+        
+        // Calculate total hours
+        let totalMinutes = 0;
+        events.forEach(event => {
+            const start = new Date(event.start);
+            const end = new Date(event.end);
+            totalMinutes += (end - start) / (1000 * 60);
+        });
+        document.getElementById('totalHours').textContent = Math.round(totalMinutes / 60);
+        
+        // Count unique assignments
+        const uniqueTitles = new Set(events.map(e => e.title));
+        document.getElementById('totalAssignments').textContent = uniqueTitles.size;
+    }
+
+    // Generate AI study plan
+    document.getElementById("generatePlan").onclick = async () => {
+        const btn = document.getElementById("generatePlan");
+        btn.disabled = true;
+        btn.innerHTML = '<span>⏳</span><span>Generating...</span>';
+        
+        showStatus('🤖 AI is analyzing your assignments and creating a personalized schedule...', 'info');
+        
+        try {
+            const res = await fetch("/generate_plan", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" }
+            });
+            
+            const data = await res.json();
+            
+            if (data.success) {
+                showStatus(`✅ Success! Generated ${data.schedule ? data.schedule.length : 'multiple'} study blocks. Refreshing calendar...`, 'success');
+                
+                // Reload page to show new schedule
+                setTimeout(() => {
+                    location.reload();
+                }, 1500);
+            } else {
+                showStatus(`❌ ${data.message || 'Failed to generate plan. Make sure you have incomplete assignments with due dates.'}`, 'error');
+                btn.disabled = false;
+                btn.innerHTML = '<span>🤖</span><span>Generate AI Study Plan</span>';
+            }
+        } catch (err) {
+            console.error('Error:', err);
+            showStatus('❌ Request failed. Please check your connection and try again.', 'error');
+            btn.disabled = false;
+            btn.innerHTML = '<span>🤖</span><span>Generate AI Study Plan</span>';
+        }
+    };
+
+    // Initialize FullCalendar
+    const calendarEl = document.getElementById("calendar");
+    
+    // Parse study events from backend
+    let studyEvents = {{ study_events|tojson|safe }};
+    
+    // Ensure events have proper format for FullCalendar
+    if (studyEvents && Array.isArray(studyEvents)) {
+        studyEvents = studyEvents.map(event => ({
+            id: event.id,
+            title: event.title,
+            start: event.start,
+            end: event.end,
+            backgroundColor: getEventColor(event.title),
+            borderColor: getEventColor(event.title),
+            textColor: '#ffffff'
+        }));
+        
+        updateStats(studyEvents);
+    } else {
+        studyEvents = [];
+        showStatus('📝 No study plan yet. Click "Generate AI Study Plan" to create one!', 'info');
+    }
+
+    // Color coding by subject
+    function getEventColor(title) {
+        const colors = {
+            'Mathematics': '#FF6B6B',
+            'Math': '#FF6B6B',
+            'Physics': '#4ECDC4',
+            'Computer Science': '#95E1D3',
+            'CS': '#95E1D3',
+            'Programming': '#95E1D3',
+            'Chemistry': '#FFA07A',
+            'Biology': '#98D8C8',
+            'English': '#FFE66D',
+            'History': '#B4A7D6'
+        };
+        
+        // Check if title contains any subject name
+        for (const [subject, color] of Object.entries(colors)) {
+            if (title.toLowerCase().includes(subject.toLowerCase())) {
+                return color;
+            }
+        }
+        
+        // Default color
+        return '#2196F3';
+    }
+
+    // Create calendar
+    calendar = new FullCalendar.Calendar(calendarEl, {
+        initialView: 'timeGridWeek',
+        headerToolbar: {
+            left: 'prev,next today',
+            center: 'title',
+            right: 'timeGridWeek,timeGridDay,listWeek'
+        },
+        slotMinTime: '06:00:00',
+        slotMaxTime: '24:00:00',
+        height: 'auto',
+        editable: true,
+        selectable: true,
+        selectMirror: true,
+        dayMaxEvents: true,
+        weekends: true,
+        events: studyEvents,
+        
+        // Event click handler
+        eventClick: function(info) {
+            if (confirm(`Study block: ${info.event.title}\nStart: ${info.event.start.toLocaleString()}\nEnd: ${info.event.end.toLocaleString()}\n\nDelete this study block?`)) {
+                deleteStudyBlock(info.event.id);
+            }
+        },
+        
+        // Event drag/resize handler
+        eventDrop: function(info) {
+            updateStudyBlock(info.event);
+        },
+        
+        eventResize: function(info) {
+            updateStudyBlock(info.event);
+        },
+        
+        // Custom event content
+        eventContent: function(arg) {
+            let timeText = arg.timeText;
+            let title = arg.event.title;
+            
+            return {
+                html: `
+                    <div style="padding: 2px 4px; overflow: hidden;">
+                        <div style="font-weight: 600; font-size: 12px;">${timeText}</div>
+                        <div style="font-size: 11px; margin-top: 2px;">${title}</div>
+                    </div>
+                `
+            };
+        }
+    });
+
+    calendar.render();
+
+    // Delete study block
+    async function deleteStudyBlock(eventId) {
+        try {
+            const res = await fetch(`/delete_study_block/${eventId}`, {
+                method: 'DELETE'
+            });
+            
+            if (res.ok) {
+                location.reload();
+            } else {
+                alert('Failed to delete study block');
+            }
+        } catch (err) {
+            console.error('Error deleting block:', err);
+            alert('Error deleting study block');
+        }
+    }
+
+    // Update study block (after drag/resize)
+    async function updateStudyBlock(event) {
+        try {
+            await fetch(`/update_study_block/${event.id}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    start: event.start.toISOString(),
+                    end: event.end.toISOString()
+                })
+            });
+        } catch (err) {
+            console.error('Error updating block:', err);
+        }
+    }
+});
+</script>
+
+{% endblock %}
