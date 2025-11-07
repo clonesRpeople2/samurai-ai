@@ -35,6 +35,8 @@ Progress Analytics	XP, streaks, and productivity insights
 git clone <your repo link>
 cd study-planner
 pip install -r requirements.txt
+Create a .env file in the project root with:
+API_KEY=your_api_key_here
 python init_db.py
 python app.py
 
