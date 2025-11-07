@@ -29,7 +29,7 @@ Progress Analytics	XP, streaks, and productivity insights
 - Python + Flask
 - SQLite database
 - JavaScript frontend
-- Hugging Face (optional for AI)
+- Hugging Face optional for AI
 
 ## Installation
 git clone <your repo link>
