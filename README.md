@@ -40,6 +40,10 @@ python app.py
 
 Then visit: http://127.0.0.1:5000/
 
+## Preview of functions
+
+https://go.screenpal.com/watch/cTXiXbnFaBI
+
 ## Created By
 Arina Shevchuk
 Majd Kalakh
