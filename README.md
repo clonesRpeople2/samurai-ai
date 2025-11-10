@@ -50,3 +50,4 @@ https://go.screenpal.com/watch/cTXiXbnFaBI
 Arina Shevchuk
 Majd Kalakh
 Nawras Abualhalawuh
+Syed Ali Rizvi
